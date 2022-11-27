@@ -7,4 +7,6 @@ void usage_err(std::string);
 
 void exitprog(ARGS);
 
-void set_target(ARGS);
+void add_target(ARGS);
+
+void rm_target(ARGS);
