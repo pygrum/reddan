@@ -6,4 +6,6 @@
 
 #### Ubuntu
 
-```sudo apt install libreadline-dev```
+```bash
+sudo apt install libreadline-dev
+```
