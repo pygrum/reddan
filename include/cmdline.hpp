@@ -12,10 +12,11 @@ class Cmdline {
         void sethelp(std::string, std::string);
         void setcmd(std::string, std::string, std::string, void (*_)(ARGS));
         void exec(ARGS);
-        ARGS tokenize(std::string);
+        void getusage(std::string);
     private:
         void help();
-
+        ARGS tokenize(std::string);
+        ARGS split(std::string);
         std::map<std::string, void (*)(ARGS)> Cmds;
         std::map<std::string, std::pair<std::string, std::string>> Help;
         std::string help_op;

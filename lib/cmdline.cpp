@@ -30,6 +30,22 @@ std::vector<std::string> Cmdline::tokenize(std::string cmd) {
 	return tokens;
 }
 
+std::vector<std::string> Cmdline::split(std::string cmd) {
+	std::vector<std::string> cmds;
+	std::string expr;
+	for (std::string::size_type i = 0; i < cmd.size(); i++) {	
+		if (cmd[i] != ';') {
+			expr = expr + cmd[i];
+		}
+		else {
+			cmds.push_back(expr);
+			expr = "";
+		}
+	}
+	cmds.push_back(expr);
+	return cmds;
+}
+
 
 
 void Cmdline::setcmd(std::string op, std::string syntax, 
@@ -43,15 +59,22 @@ void Cmdline::sethelp(std::string op, std::string helpmsg) {
 	help_msg = helpmsg;
 }
 
+int spacing = 25;
+
+void Cmdline::getusage(std::string util){
+	std::cout << std::setw(spacing) << std::left << Help[util].first
+		<< std::setw(spacing) << std::left << Help[util].second << std::endl;
+}
+
 void Cmdline::help() {
 	for (auto const& [key, val] : Help) {
-		std::cout << std::setw(15) << std::left << key
-		<< std::setw(15) << std::left << val.first
-		<< std::setw(15) << std::left << val.second << std::endl;		
+		std::cout << std::setw(spacing) << std::left << key
+		<< std::setw(spacing) << std::left << val.first
+		<< std::setw(spacing) << std::left << val.second << std::endl;		
 	}
-	std::cout << std::setw(15) << std::left << help_op
-	<< std::setw(15) << std::left << ""
-	<< std::setw(15) << std::left << help_msg << std::endl;
+	std::cout << std::setw(spacing) << std::left << help_op
+	<< std::setw(spacing) << std::left << ""
+	<< std::setw(spacing) << std::left << help_msg << std::endl;
 }
 
 void Cmdline::exec(std::vector<std::string> tokens) {
@@ -74,12 +97,14 @@ void Cmdline::read() {
 		std::string cmd{line};
 		free(line);
         //remove trailing, leading and extra whitespaces
-		cmd = std::regex_replace(cmd, std::regex("^ +| +$|( ) +"), "$1");	
-        std::vector<std::string> tokens = tokenize(cmd);
-		if (tokens[0] == "help")
-			help();
-		else
-        	exec(tokens);
+		for (auto i : split(cmd)) {	
+			i = std::regex_replace(i, std::regex("^ +| +$|( ) +"), "$1");
+			std::vector<std::string> tokens = tokenize(i);
+			if (tokens[0] == "help")
+				help();
+			else
+				exec(tokens);
+		}
     }
 }
 
