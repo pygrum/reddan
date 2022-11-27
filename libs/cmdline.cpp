@@ -87,7 +87,6 @@ void Cmdline::exec(std::vector<std::string> tokens) {
     else {
         Cmds[op](tokens);
     }
-//    Cmds[op](tokens);
 }
 
 void Cmdline::read() {

@@ -9,7 +9,7 @@ using json = nlohmann::json;
 Cmdline cmdline("reddan","[RDN]∮");
 
 void usage_err(std::string util) {
-    std::cout << util << ": invalid usage";
+    std::cout << util << ": invalid usage\n";
     cmdline.getusage(util);
 }
 

@@ -10,7 +10,8 @@ void exitprog(ARGS) {
 
 
 void set_target(ARGS args) {
-    if (args.size() != 1)
+    if (args.size() != 1) {
         usage_err("set-target");
-    std::cout << "Target set\n";
+    }
+    
 }
