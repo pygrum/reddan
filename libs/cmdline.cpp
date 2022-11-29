@@ -62,17 +62,17 @@ void Cmdline::sethelp(std::string op, std::string helpmsg) {
 int spacing = 25;
 
 void Cmdline::getusage(std::string util){
-	std::cout << std::setw(spacing) << std::left << Help[util].first
-		<< std::setw(spacing) << std::left << Help[util].second << std::endl;
+	std::cout << std::setw(15) << std::left << Help[util].first
+		<< std::setw(35) << std::left << Help[util].second << std::endl;
 }
 
 void Cmdline::help() {
 	for (auto const& [key, val] : Help) {
-		std::cout << std::setw(spacing) << std::left << key
+		std::cout << std::setw(15) << std::left << key
 		<< std::setw(spacing) << std::left << val.first
 		<< std::setw(spacing) << std::left << val.second << std::endl;		
 	}
-	std::cout << std::setw(spacing) << std::left << help_op
+	std::cout << std::setw(15) << std::left << help_op
 	<< std::setw(spacing) << std::left << ""
 	<< std::setw(spacing) << std::left << help_msg << std::endl;
 }
