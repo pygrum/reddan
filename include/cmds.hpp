@@ -1,5 +1,6 @@
 #include <vector>
 #include <string>
+#include <nlohmann/json.hpp>
 
 typedef std::vector<std::string> ARGS; 
 
@@ -14,3 +15,5 @@ void rm_target(ARGS);
 void info(ARGS);
 
 void targets(ARGS);
+
+nlohmann::json getConfig();

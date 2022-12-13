@@ -24,7 +24,7 @@ void init(std::string project) {
 		std::string conf{entry.path()};
 		conf.erase(conf.length()-5);
 		if (project == conf.substr(7,-1)){
-			std::cout << "error: a project with this name already exists\n";
+			std::cerr << "error: a project with this name already exists\n";
 			exit(1);
 		}
 	}
@@ -65,7 +65,7 @@ void load(std::string project){
 			return;
 		}
 	}
-	std::cout << "error: '" << project << "' does not match the name of any existing projects\n";
+	std::cerr << "error: '" << project << "' does not match the name of any existing projects\n";
 	exit(1);
 }
 

@@ -67,7 +67,7 @@ void add_target(ARGS args) {
     }
     log("Validating parameters...");
     if (!validIPAddress(args[1])){
-        log("error: IP address is invalid");
+        std::cerr << "error: IP address is invalid";
         return;
     }
     json config = getConfig();
@@ -76,7 +76,14 @@ void add_target(ARGS args) {
     target["id"] = config["targets"].size();
     target["name"] = args[0];
     target["ip"] = args[1];
-    target["uri"] = json::array();
+    target["uris"] = json::array();
+    json beacon = {
+        {"id",config["targets"].size()},
+        {"alive",false},
+        {"persistent",false},
+        {"port",-1}
+    };
+    target["beacon"] = beacon;
     config["targets"].push_back(target);
     setConfig(config);
     log("success");
@@ -108,12 +115,12 @@ void info(ARGS args){
         id = std::stoi(args[0]);
     }
     catch (...) {
-        std::cout << "error: invalid target id\n";
+        std::cerr << "error: invalid target id\n";
         return;
     }
     json config = getConfig();
     if (id+1 > config["targets"].size()){
-        std::cout << "error: target does not exist\n";
+        std::cerr << "error: target does not exist\n";
         return;
     }
     std::vector properties = { "id", "name", "ip", "uri" };
@@ -137,7 +144,7 @@ void rm_target(ARGS args){
         id = std::stoi(args[0]);
     }
     catch (...) {
-        std::cout << "error: invalid target id\n";
+        std::cerr << "error: invalid target id\n";
         return;
     }
     json j = json::array();
