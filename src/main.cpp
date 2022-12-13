@@ -8,6 +8,7 @@
 #include <cmds.hpp>
 #include <nlohmann/json.hpp>
 
+
 using json = nlohmann::json;
 namespace fs = std::filesystem;
 
@@ -57,6 +58,7 @@ void ls(){
 }
 
 void load(std::string project){
+	fs::create_directories("config");
     for (const auto & entry : fs::directory_iterator("config")){
 		std::string conf{entry.path()};
 		conf.erase(conf.length()-5);
@@ -96,7 +98,7 @@ int main(int argc, char *argv[]) {
 	std::ofstream o(".runtime");
 	o << projectname;
 	o.close();
-	system("clear");
+	//system("clear");
 	cmdline.setcmd("target-info","target-info <id>",
 	"display information about specified target",info);
 	cmdline.setcmd("targets","","list all targets in project",targets);
