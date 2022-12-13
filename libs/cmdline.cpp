@@ -62,7 +62,7 @@ void Cmdline::sethelp(std::string op, std::string helpmsg) {
 int spacing = 25;
 
 void Cmdline::getusage(std::string util){
-	std::cout << std::setw(15) << std::left << Help[util].first
+	std::cout << std::setw(30) << std::left << Help[util].first
 		<< std::setw(35) << std::left << Help[util].second << std::endl;
 }
 

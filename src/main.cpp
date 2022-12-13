@@ -3,6 +3,7 @@
 #include <fstream>
 #include <algorithm>
 #include <filesystem>
+#include <functional>
 #include <cmdline.hpp>
 #include <cmds.hpp>
 #include <nlohmann/json.hpp>
@@ -10,7 +11,7 @@
 using json = nlohmann::json;
 namespace fs = std::filesystem;
 
-Cmdline cmdline("reddan","[RDN]∮");
+Cmdline cmdline("reddan","[RDN]$");
 std::string projectname;
 
 void usage_err(std::string util) {
@@ -56,7 +57,16 @@ void ls(){
 }
 
 void load(std::string project){
-	projectname = project;
+    for (const auto & entry : fs::directory_iterator("config")){
+		std::string conf{entry.path()};
+		conf.erase(conf.length()-5);
+        if (project == conf.substr(7,-1)) {
+			projectname = project;
+			return;
+		}
+	}
+	std::cout << "error: '" << project << "' does not match the name of any existing projects\n";
+	exit(1);
 }
 
 int main(int argc, char *argv[]) {
@@ -77,7 +87,7 @@ int main(int argc, char *argv[]) {
 			ls();
 		}
 		else{
-			load(std::string{argv[1]});
+			load(argv[1]);
 		}
 	}
 	else {

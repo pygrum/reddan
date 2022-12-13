@@ -76,6 +76,7 @@ void add_target(ARGS args) {
     target["id"] = config["targets"].size();
     target["name"] = args[0];
     target["ip"] = args[1];
+    target["uri"] = json::array();
     config["targets"].push_back(target);
     setConfig(config);
     log("success");
@@ -115,7 +116,7 @@ void info(ARGS args){
         std::cout << "error: target does not exist\n";
         return;
     }
-    std::vector properties = { "id", "name", "ip" };
+    std::vector properties = { "id", "name", "ip", "uri" };
     for ( auto &pt : properties) {
         std::string prop = pt;
         std::string propUpper = pt;
