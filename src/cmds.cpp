@@ -78,7 +78,6 @@ void add_target(ARGS args) {
     target["ip"] = args[1];
     target["uris"] = json::array();
     json beacon = {
-        {"id",config["targets"].size()},
         {"alive",false},
         {"persistent",false},
         {"port",-1}

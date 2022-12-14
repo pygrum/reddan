@@ -3,3 +3,4 @@ reddan
 .runtime
 *.json
 .github/workflows/security.yml
+*.gch
