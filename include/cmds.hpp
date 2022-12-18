@@ -22,3 +22,5 @@ void r_exec(ARGS);
 
 nlohmann::json getConfig();
 void setConfig(nlohmann::json &config);
+
+void compile(ARGS);

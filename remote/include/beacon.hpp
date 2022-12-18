@@ -13,7 +13,6 @@ class Beacon {
         int send_upstream(std::string update);
         void await_update();
         std::string respond(std::string);
-        std::string exec(const char* cmd);
     private:
         int id;
         int port;

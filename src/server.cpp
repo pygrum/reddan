@@ -47,7 +47,6 @@ void process(std::string reply, std::string ip, int port){
     if (status != SUCCESS) {
         std::cerr << "error executing command on beacon at [" << ip << "]\n";
     }
-    std::cout << "[b-" << id << "]" << std::endl;
     std::cout << cout << std::endl;
     json config = getConfig();
     config["targets"][id]["beacon"]["alive"] = alive;

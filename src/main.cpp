@@ -108,6 +108,8 @@ int main(int argc, char *argv[]) {
 	"register existence of beacon on target with specified id",new_beacon);
 	cmdline.setcmd("rm-target","rm-target <id>",
 	"remove a target from project",rm_target);
+	cmdline.setcmd("compile","compile <id> <compiler>",
+	"compile beacon using specified compiler", compile);
 	cmdline.setcmd("r-exec","r-exec <id>",
 	"execute a command on remote target",r_exec);
 	cmdline.setcmd("exit", "", "exit the program", exitprog);

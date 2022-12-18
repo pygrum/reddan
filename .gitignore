@@ -4,4 +4,5 @@ reddan
 *.json
 .github/workflows/security.yml
 *.gch
-*beacon*
+remote/beacon
+beacon
