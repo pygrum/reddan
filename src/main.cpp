@@ -98,14 +98,18 @@ int main(int argc, char *argv[]) {
 	std::ofstream o(".runtime");
 	o << projectname;
 	o.close();
-	//system("clear");
+	system("clear");
 	cmdline.setcmd("target-info","target-info <id>",
 	"display information about specified target",info);
 	cmdline.setcmd("targets","","list all targets in project",targets);
 	cmdline.setcmd("add-target","add-target <name> <ip>",
 	"add a target to project",add_target);
+	cmdline.setcmd("new-beacon","new-beacon <id> <port>",
+	"register existence of beacon on target with specified id",new_beacon);
 	cmdline.setcmd("rm-target","rm-target <id>",
 	"remove a target from project",rm_target);
+	cmdline.setcmd("r-exec","r-exec <id>",
+	"execute a command on remote target",r_exec);
 	cmdline.setcmd("exit", "", "exit the program", exitprog);
 	cmdline.sethelp("help", "display this help message");
 	cmdline.read();
