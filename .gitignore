@@ -1,7 +1,7 @@
 .vscode/
 reddan
 .runtime
-*.json
+config/
 .github/workflows/security.yml
 *.gch
 remote/beacon
