@@ -11,7 +11,7 @@ class Cmdline {
         Cmdline(std::string, std::string);
         void read();
         void sethelp(std::string, std::string);
-        void setcmd(std::string, std::string, std::string, void (*_)(ARGS));
+        void setcmd(std::string, std::string, std::string, int (*_)(ARGS));
         int exec(ARGS);
         void getusage(std::string);
         std::tuple<int, std::string> accept(std::string);
@@ -19,7 +19,7 @@ class Cmdline {
         void help();
         ARGS tokenize(std::string);
         ARGS split(std::string);
-        std::map<std::string, void (*)(ARGS)> Cmds;
+        std::map<std::string, int (*)(ARGS)> Cmds;
         std::map<std::string, std::pair<std::string, std::string>> Help;
         std::string help_op;
         std::string help_msg;

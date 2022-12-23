@@ -1,26 +1,31 @@
 #include <vector>
 #include <string>
+#include <tuple>
 #include <nlohmann/json.hpp>
 
 typedef std::vector<std::string> ARGS; 
 
 void usage_err(std::string);
 
-void exitprog(ARGS);
+int exitprog(ARGS);
 
-void add_target(ARGS);
+int add_target(ARGS);
 
-void rm_target(ARGS);
+int rm_target(ARGS);
 
-void info(ARGS);
+int info(ARGS);
 
-void targets(ARGS);
+int targets(ARGS);
 
-void new_beacon(ARGS);
+int new_beacon(ARGS);
 
-void r_exec(ARGS);
+int r_exec(ARGS);
 
-nlohmann::json getConfig();
+nlohmann::json *getConfig();
 void setConfig(nlohmann::json &config);
 
-void compile(ARGS);
+int compile(ARGS);
+
+std::string get_binary(std::string cmdline_util);
+
+std::tuple<int, int, const char*> get_beacon_data();

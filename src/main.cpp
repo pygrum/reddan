@@ -14,6 +14,26 @@ namespace fs = std::filesystem;
 
 Cmdline cmdline("reddan","[RDN]$");
 std::string projectname;
+json config;
+
+void initConfig() {
+	std::string name = "config/" + projectname + ".json";
+    std::ifstream configfile(name);
+    configfile >> config;
+    configfile.close();
+}
+
+json *getConfig() {
+    return &config;
+}
+
+void setConfig(json &j_config){
+	config = j_config;
+	std::string name = "config/" + projectname + ".json";
+    std::ofstream o(name);
+    o << std::setw(4) << j_config << std::endl;
+    o.close();
+}
 
 void usage_err(std::string util) {
     std::cout << util << ": invalid usage / parameters\n";
@@ -95,9 +115,7 @@ int main(int argc, char *argv[]) {
 	else {
 		usage(argv[0]);
 	}
-	std::ofstream o(".runtime");
-	o << projectname;
-	o.close();
+	initConfig();
 	system("clear");
 	cmdline.setcmd("target-info","target-info <id>",
 	"display information about specified target",info);
