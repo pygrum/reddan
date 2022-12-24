@@ -31,6 +31,9 @@ void process(std::string reply, std::string ip, int port){
         b_response = json::parse(reply);
     }
     catch (...) {
+        if (reply == ""){
+            return;
+        }
         std::cerr << "failed to parse json from beacon on " << ip << std::endl;
         return;
     }

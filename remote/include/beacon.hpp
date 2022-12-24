@@ -26,5 +26,10 @@ const char *get_ip_addr();
 
 std::string exec(const char *cmd);
 
-int revshell(ARGS);
+int revshell(int);
 
+int rs(ARGS);
+
+int get_port();
+
+bool request_revshell();

