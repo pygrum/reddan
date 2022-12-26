@@ -183,8 +183,12 @@ int compile(ARGS args){
     int id_int = std::stoi(id);
     int port;
     std::string ip_addr;
-
+    try {
     port = config["targets"][id_int]["beacon"]["port"];
+    } catch (...) {
+        std::cout << "no beacon configured for this target. please add a beacon with 'new-beacon'\n";
+        return 1;
+    }
     ip_addr = config["targets"][id_int]["ip"];
 
     std::string port_str = std::to_string(port);
@@ -200,7 +204,7 @@ int compile(ARGS args){
 
     system("echo \"binary to be saved to $PWD/beacon\"");
     std::string compiler = args[1];
-    std::string cmdexec = compiler + " remote/*.cpp libs/*.cpp -I include/ -I remote/ -o $PWD/beacon -Wno-write-strings -lreadline";
+    std::string cmdexec = compiler + " remote/*.cpp libs/*.cpp -I include/ -I remote/ -o $PWD/beacon -Wno-write-strings -std=c++17 -lreadline";
     system(cmdexec.c_str());
     const int result = remove("remote/beacon.vars");
     if (result != 0)
@@ -244,7 +248,7 @@ std::string get_binary(std::string util){
     json j;
     std::string statement;
     std::string nc_bin;
-    std::ifstream f("config/binaries.json");
+    std::ifstream f(".binaries");
     f >> j;
     return j[util];
 }

