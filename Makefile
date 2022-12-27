@@ -1,7 +1,7 @@
 IDIR=include/
 CC=g++
 OUTFILE=reddan
-CFLAGS=-I $(IDIR) -o $(OUTFILE)
+CFLAGS=-I $(IDIR) -o $(OUTFILE) -std=c++17
 
 EXTLIBS=-lreadline
 LIBS = libs/*

