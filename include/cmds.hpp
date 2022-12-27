@@ -23,7 +23,7 @@ int r_exec(ARGS);
 
 int lhost(ARGS);
 
-void setConfig(nlohmann::json &config);
+void setConfig();
 
 extern nlohmann::json config;
 

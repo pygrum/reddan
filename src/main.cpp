@@ -23,11 +23,10 @@ void initConfig() {
     configfile.close();
 }
 
-void setConfig(json &j_config){
-	config = j_config;
+void setConfig(){
 	std::string name = "config/" + projectname + ".json";
     std::ofstream o(name);
-    o << std::setw(4) << j_config << std::endl;
+    o << std::setw(4) << config << std::endl;
     o.close();
 }
 

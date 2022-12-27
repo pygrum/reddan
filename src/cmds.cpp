@@ -45,7 +45,7 @@ int add_target(ARGS args) {
     target["ip"] = args[1];
     target["uris"] = json::array();
     config["targets"].push_back(target);
-    setConfig(config);
+    setConfig();
     log("success");
     return 0;
 }
@@ -90,7 +90,7 @@ int new_beacon(ARGS args){
         {"port",port}
     };
     config["targets"][tid]["beacon"] = beacon;
-    setConfig(config);
+    setConfig();
     return 0;
 }
 
@@ -159,7 +159,7 @@ int rm_target(ARGS args){
         }
     }
     config["targets"] = j;
-    setConfig(config);
+    setConfig();
     log("success");
     return 0;
 }
@@ -270,7 +270,7 @@ int lhost(ARGS args){
         return 1;
     }
     config["lhost"] = args[0];
-    setConfig(config);
+    setConfig();
     return 0;
 }
 

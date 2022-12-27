@@ -53,7 +53,7 @@ void process(std::string reply, std::string ip, int port){
     std::cout << cout << std::endl;
     config["targets"][id]["beacon"]["alive"] = alive;
     config["targets"][id]["beacon"]["persistent"] = persistent;
-    setConfig(config);
+    setConfig();
 }
 
 void communicate(int tid, std::string update) {
