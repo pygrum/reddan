@@ -16,7 +16,6 @@
 using json = nlohmann::json;
 
 std::tuple<std::string, int> get_beacon_data(sockaddr_in &sa, int &tid){
-    json config = *getConfig();
     std::string ip_addr = config["targets"][tid]["ip"];
     return {ip_addr, config["targets"][tid]["beacon"]["port"]};
 }
@@ -52,7 +51,6 @@ void process(std::string reply, std::string ip, int port){
         std::cerr << "error executing command on beacon at [" << ip << "]\n";
     }
     std::cout << cout << std::endl;
-    json config = *getConfig();
     config["targets"][id]["beacon"]["alive"] = alive;
     config["targets"][id]["beacon"]["persistent"] = persistent;
     setConfig(config);

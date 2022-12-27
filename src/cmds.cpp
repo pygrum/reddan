@@ -38,7 +38,6 @@ int add_target(ARGS args) {
         std::cerr << "error: IP address is invalid";
         return 1;
     }
-    json config = *getConfig();
     json target = json({});
     log("creating entry...");
     target["id"] = config["targets"].size();
@@ -80,7 +79,6 @@ int new_beacon(ARGS args){
         std::cerr << "error: invalid port number\n";
         return 1;
     }
-    json config = *getConfig();
     if (!validTarget(args[0], config["targets"].size())){
         usage_err("new-beacon");
     }
@@ -101,7 +99,6 @@ int targets(ARGS args){
         usage_err("targets");
         return 1;   
     }
-    json config = *getConfig();
     for (auto &i : config["targets"]){
         std::stringstream ss;
         ss << "target " << i["id"] << ":";
@@ -118,7 +115,6 @@ int info(ARGS args){
         usage_err("target-info");
         return 1;
     }
-    json config = *getConfig();
     if (!validTarget(args[0], config["targets"].size())){
         usage_err("target-info");
         return 1;
@@ -144,7 +140,6 @@ int rm_target(ARGS args){
         usage_err("rm-target");
         return 1;
     }
-    json config = *getConfig();
     if (!validTarget(args[0], config["targets"].size())){
         usage_err("rm-target");
         return 1;
@@ -174,7 +169,6 @@ int compile(ARGS args){
         usage_err("compile");
         return 1;
     }
-    json config = *getConfig();
     if (!validTarget(args[0], config["targets"].size())){
         usage_err("compile");
         return 1;
@@ -188,10 +182,18 @@ int compile(ARGS args){
     port = config["targets"][id_int]["beacon"]["port"];
     } catch (...) {
         std::cout << "no beacon configured for this target. please add a beacon with 'new-beacon'\n";
+        usage_err("new-beacon");
         return 1;
     }
     ip_addr = config["targets"][id_int]["ip"];
-    serv_ip_addr = config["lhost"];
+    try {
+        serv_ip_addr = config["lhost"];
+    }
+    catch (...){
+        std::cerr << "please set the server IP with the 'lhost' command\n";
+        usage_err("lhost");
+        return 1;
+    }
 
     std::string port_str = std::to_string(port);
 
@@ -257,12 +259,26 @@ std::string get_binary(std::string util){
     return j[util];
 }
 
+int lhost(ARGS args){
+    if (args.size() != 1){
+        usage_err("lhost");
+        return 1;
+    }
+    if (!validIPAddress(args[0])){
+        std::cerr << "IP address is invalid\n";
+        usage_err("lhost");
+        return 1;
+    }
+    config["lhost"] = args[0];
+    setConfig(config);
+    return 0;
+}
+
 int r_exec(ARGS args){
     if (args.size() != 1){
         usage_err("r-exec");
         return 1;
     }
-    json config = *getConfig();
     if (!validTarget(args[0], config["targets"].size())){
         usage_err("r-exec");
         return 1;

@@ -21,8 +21,11 @@ int new_beacon(ARGS);
 
 int r_exec(ARGS);
 
-nlohmann::json *getConfig();
+int lhost(ARGS);
+
 void setConfig(nlohmann::json &config);
+
+extern nlohmann::json config;
 
 int compile(ARGS);
 

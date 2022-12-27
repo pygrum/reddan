@@ -23,10 +23,6 @@ void initConfig() {
     configfile.close();
 }
 
-json *getConfig() {
-    return &config;
-}
-
 void setConfig(json &j_config){
 	config = j_config;
 	std::string name = "config/" + projectname + ".json";
@@ -36,7 +32,6 @@ void setConfig(json &j_config){
 }
 
 void usage_err(std::string util) {
-    std::cout << util << ": invalid usage / parameters\n";
     cmdline.getusage(util);
 }
 
@@ -124,6 +119,7 @@ int main(int argc, char *argv[]) {
 	"add a target to project",add_target);
 	cmdline.setcmd("new-beacon","new-beacon <id> <port>",
 	"register existence of beacon on target with specified id",new_beacon);
+	cmdline.setcmd("lhost","lhost <lhost>","set your local ip address for beacons to talk to",lhost);
 	cmdline.setcmd("rm-target","rm-target <id>",
 	"remove a target from project",rm_target);
 	cmdline.setcmd("compile","compile <id> <compiler>",

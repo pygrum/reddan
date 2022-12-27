@@ -7,7 +7,6 @@
 #include <unistd.h>
 #include <array>
 #include <cmdline.hpp>
-#include <cmds.hpp>
 #include <nlohmann/json.hpp>
 #include <include/beacon.hpp>
 #include <beacon.vars>
